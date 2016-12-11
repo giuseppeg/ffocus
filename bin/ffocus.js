@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {exec} from 'child_process'
 import program from 'commander'
 import {writeFileSync} from 'fs'
@@ -199,7 +201,7 @@ function run({minutes, sites}) {
 
   setTimeout(() => {
     log(`👊  You're doing great!`)
-    log(`👊  You've been more productive for ${minutes/2} minutes`)
+    log(`👊  You've been productive for ${minutes/2} minutes`)
   }, (minutes/2) * 6e4)
 
   setTimeout(() => {
@@ -207,7 +209,7 @@ function run({minutes, sites}) {
     cleanup()
   }, minutes * 6e4)
 
-  log(`✅  Focus for ${minutes} minutes.`)
+  log(`✅  Now focus for ${minutes} minutes.`)
 }
 
 function write(data, cb) {
@@ -245,6 +247,6 @@ function log(msg) {
 
 function error(msg, sudo) {
   console.error.call(console, `☠️  ${msg}`)
-  sudo && console.error('☠️  ffocus need sudo rights to run')
+  sudo && console.error('☠️  ffocus needs sudo rights to run')
   process.exit(1)
 }
