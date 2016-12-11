@@ -2,6 +2,8 @@
 
 A CLI tool to temporarly disable distracting websites and boost your productivity 👌
 
+<img width="514" alt="screen shot 2016-12-11 at 23 21 43" src="https://cloud.githubusercontent.com/assets/711311/21083820/dc2beada-bff8-11e6-9846-334203e62e8a.png">
+
 ## install
 
 ```bash
