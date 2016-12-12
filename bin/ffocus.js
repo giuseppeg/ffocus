@@ -25,6 +25,7 @@ let presets = config.presets || {}
 
 
 // register cleanups
+
 process.on('SIGINT', cleanup)
 process.on('uncaughtException', cleanup)
 
@@ -97,42 +98,41 @@ if (action) {
   }
 
   const actions = {
-    add: (preset, host) => {
-      const original = presets[preset] || dummyPreset
-      if (original.sites.indexOf(host) !== -1) {
-        log(`"${preset}" already contains ${host}`)
+    add: (name, preset, host) => {
+      if (preset.sites.indexOf(host) !== -1) {
+        log(`"${name}" already contains ${host}`)
         return original
       }
-      log(`Adding ${host} to "${preset}"`)
+      log(`Adding ${host} to "${name}"`)
       return {
-        ...original,
-        sites: original.sites.concat([host])
+        ...preset,
+        sites: preset.sites.concat([host])
       }
     },
-    remove: (preset, host) => {
-      log(`Removing ${host} from "${preset}"`)
-      const original = presets[preset] || dummyPreset
+    remove: (name, preset, host) => {
+      log(`Removing ${host} from "${name}"`)
       return {
-        ...original,
-        sites: original.sites.filter(h => h !== host)
+        ...preset,
+        sites: preset.sites.filter(h => h !== host)
       }
     },
-    duration: (preset, minutes) => {
-      log(`Setting the duration for "${preset}" to ${minutes} minutes`)
+    duration: (name, preset, minutes) => {
+      log(`Setting the duration for "${name}" to ${minutes} minutes`)
       const mins = Number(minutes)
       if (isNaN(mins)) {
         error(`"minutes" must be a number`)
       }
-      const original = presets[preset] || dummyPreset
       return {
-        ...original,
+        ...preset,
         minutes: mins
       }
     }
   }
 
   const update = actions[action.name](
-    program.preset, action.value
+    program.preset,
+    presets[program.preset] || dummyPreset,
+    action.value
   )
 
   presets = Object.assign(
@@ -149,12 +149,13 @@ if (action) {
 
   config = Object.assign({}, config, { presets })
 
-  write(config, (err) => {
-    if (err) {
-      error(`An error occurred while saving the configuration: ${err}`)
-    }
-    log(`Configuration saved.`)
-  })
+  try {
+    write(config)
+  } catch (err) {
+    error(`An error occurred while saving the configuration: ${err.message}`, true)
+  }
+
+  log(`Configuration saved.`)
   process.exit(0)
 }
 
@@ -212,18 +213,17 @@ function run({minutes, sites}) {
   log(`✅  Now focus for ${minutes} minutes.`)
 }
 
-function write(data, cb) {
+function write(data) {
   writeFileSync(
     configFilePath,
     JSON.stringify(data, null, 2),
     { flag: 'w' },
-    'utf8',
-    cb || function () {}
+    'utf8'
   )
 }
 
 function cleanup() {
-  const allSites = Object.keys(config.presets || {}).reduce(
+  const allSites = Object.keys(presets).reduce(
     (acc, preset) => {
       acc = acc.concat(presets[preset].sites)
       return acc
@@ -242,11 +242,11 @@ function cleanup() {
 }
 
 function log(msg) {
-  console.log.call(console, `🔍  ${msg}`)
+  console.log(`🔍  ${msg}`)
 }
 
 function error(msg, sudo) {
-  console.error.call(console, `☠️  ${msg}`)
+  console.error(`☠️  ${msg}`)
   sudo && console.error('☠️  ffocus needs sudo rights to run')
   process.exit(1)
 }
