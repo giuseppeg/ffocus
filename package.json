@@ -15,7 +15,6 @@
     "prebuild": "mkdir -p dist",
     "build": "babel bin/ffocus.js -o dist/ffocus.js",
     "prepublish": "npm run build",
-    "pretest": "npm run build",
     "test": "exit(0)"
   },
   "keywords": [
