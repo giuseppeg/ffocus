@@ -47,12 +47,14 @@ and has a name, minutes, and a list of hosts to block.
 
 ```json
 {
-  "work": {
-    "minutes": 60,
-    "sites": [
-      "facebook.com",
-      "twitter.com"
-    ]
+  "presets": {
+    "work": {
+      "minutes": 60,
+      "sites": [
+        "facebook.com",
+        "twitter.com"
+      ]
+    }
   }
 }
 ```
