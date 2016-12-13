@@ -100,7 +100,7 @@ if (action) {
   const actions = {
     add: (name, preset, host) => {
       if (preset.sites.indexOf(host) !== -1) {
-        log(`"${name}" already contains ${host}`)
+        error(`"${name}" already contains ${host}`)
         return original
       }
       log(`Adding ${host} to "${name}"`)
@@ -110,6 +110,7 @@ if (action) {
       }
     },
     remove: (name, preset, host) => {
+      presetExists(name)
       log(`Removing ${host} from "${name}"`)
       return {
         ...preset,
@@ -117,6 +118,7 @@ if (action) {
       }
     },
     duration: (name, preset, minutes) => {
+      presetExists(name)
       log(`Setting the duration for "${name}" to ${minutes} minutes`)
       const mins = Number(minutes)
       if (isNaN(mins)) {
@@ -135,17 +137,19 @@ if (action) {
     action.value
   )
 
+  // remove preset if empty
+  if (!update.sites.length) {
+    const {[program.preset]: removed, ...rest} = presets
+    presets = rest
+  }
+
   presets = Object.assign(
     {},
     presets,
-    {
+    update.sites.length ? {
       [program.preset]: update
-    }
+    } : {}
   )
-
-  if (!presets[program.preset]) {
-    error(`preset "${program.preset}" not found`)
-  }
 
   config = Object.assign({}, config, { presets })
 
@@ -165,10 +169,8 @@ if (action) {
 let preset
 if (program.preset) {
   // preset
+  presetExists(program.preset)
   preset = presets[program.preset]
-  if (!preset) {
-    error(`preset "${program.preset}" not found`)
-  }
 } else {
   // one off
   if (!minutes || !sites) {
@@ -239,6 +241,12 @@ function cleanup() {
   })
 
   process.exit(0)
+}
+
+function presetExists(name) {
+  if (!presets[name]) {
+    error(`preset "${name}" not found`)
+  }
 }
 
 function log(msg) {
