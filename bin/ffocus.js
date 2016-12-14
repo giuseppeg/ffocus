@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import {exec} from 'child_process'
 import program from 'commander'
 import {writeFileSync} from 'fs'
 import hostile from 'hostile'
@@ -54,7 +53,7 @@ if (program.list) {
     log('📚  No presets found.')
   } else {
     log('📚  Available presets:')
-    Object.keys(presets).forEach(preset => {
+    availablePresets.forEach(preset => {
       log(`📚  "${preset}" runs every ${presets[preset].minutes} minutes`)
       log(`📚  \tblocked sites:`)
       presets[preset].sites.forEach(
@@ -137,19 +136,17 @@ if (action) {
     action.value
   )
 
-  // remove preset if empty
   if (!update.sites.length) {
+    // remove preset if empty
     const {[program.preset]: removed, ...rest} = presets
     presets = rest
+  } else {
+    presets = Object.assign(
+      {},
+      presets,
+      { [program.preset]: update }
+    )
   }
-
-  presets = Object.assign(
-    {},
-    presets,
-    update.sites.length ? {
-      [program.preset]: update
-    } : {}
-  )
 
   config = Object.assign({}, config, { presets })
 
